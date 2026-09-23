@@ -11,6 +11,7 @@ App de apuntes a mano para iPad, estilo GoodNotes, hecha en **Swift + SwiftUI + 
 - **Fondo con degradado en movimiento** (MeshGradient) que toma los colores de tus cuadernos.
 - Tapas de cuaderno con brillo y el título sobre una **etiqueta de vidrio**.
 - Botón flotante **“Nuevo cuaderno”** en vidrio, vista previa de la tapa al crear y miniaturas de páginas con número en vidrio.
+- **Todo es vidrio**: la pantalla de nuevo cuaderno (campo de texto en cápsula, colores con aro de vidrio que se desliza, mini-hojas en baldosas de vidrio), el buscador, la pantalla vacía y las alertas.
 - La paleta del Apple Pencil y las hojas emergentes usan el vidrio del sistema.
 
 ## Qué hace
@@ -52,6 +53,7 @@ Con un Apple ID gratis la app **caduca a los 7 días** y hay que volver a instal
 | `NotebookStore.swift` | Guarda y carga los cuadernos (JSON en Documentos) |
 | `LibraryView.swift` | Pantalla de cuadernos y creación de cuaderno nuevo |
 | `NotebookView.swift` | Pantalla de escritura, barra de herramientas y miniaturas |
+| `LiquidGlass.swift` | Estilos de vidrio de toda la app: tarjetas, secciones, campo de texto, selectores con efecto “derretido” |
 | `GlassBackdrop.swift` | Fondo de degradado animado detrás del vidrio |
 | `PageCanvas.swift` | Lienzo de PencilKit con fondo de hoja y zoom |
 | `PDFExporter.swift` | Exportar a PDF y hoja de compartir |

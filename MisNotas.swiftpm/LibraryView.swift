@@ -9,6 +9,7 @@ struct LibraryView: View {
     @State private var renaming: Notebook?
     @State private var newTitle = ""
     @State private var deleting: Notebook?
+    @State private var search = ""
 
     private let columns = [GridItem(.adaptive(minimum: 160, maximum: 210), spacing: 28)]
 
@@ -16,15 +17,21 @@ struct LibraryView: View {
         NavigationStack(path: $path) {
             Group {
                 if store.notebooks.isEmpty {
-                    ContentUnavailableView(
-                        "Aún no tienes cuadernos",
-                        systemImage: "book.closed",
-                        description: Text("Toca “Nuevo cuaderno” para empezar.")
+                    emptyState(
+                        icon: "book.closed",
+                        title: "Aún no tienes cuadernos",
+                        message: "Toca “Nuevo cuaderno” para empezar."
+                    )
+                } else if filtered.isEmpty {
+                    emptyState(
+                        icon: "magnifyingglass",
+                        title: "Sin resultados",
+                        message: "No hay cuadernos que se llamen “\(search)”."
                     )
                 } else {
                     ScrollView {
                         LazyVGrid(columns: columns, spacing: 32) {
-                            ForEach(store.notebooks) { notebook in
+                            ForEach(filtered) { notebook in
                                 NavigationLink(value: notebook.id) {
                                     NotebookCover(notebook: notebook)
                                 }
@@ -37,8 +44,9 @@ struct LibraryView: View {
                     }
                 }
             }
-            .background { GlassBackdrop(colors: backdropColors) }
+            .glassScreen(backdropColors)
             .navigationTitle("Mis cuadernos")
+            .searchable(text: $search, prompt: "Buscar cuadernos")
             .overlay(alignment: .bottom) {
                 // Botón flotante de vidrio
                 Button {
@@ -112,6 +120,32 @@ struct LibraryView: View {
         } label: {
             Label("Eliminar", systemImage: "trash")
         }
+    }
+
+    private var filtered: [Notebook] {
+        let query = search.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return store.notebooks }
+        return store.notebooks.filter { $0.title.localizedCaseInsensitiveContains(query) }
+    }
+
+    private func emptyState(icon: String, title: String, message: String) -> some View {
+        VStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 44, weight: .light))
+                .foregroundStyle(.tint)
+                .frame(width: 88, height: 88)
+                .glassEffect(.regular.tint(Color.accentColor.opacity(0.2)), in: .circle)
+            Text(title)
+                .font(.title3.weight(.semibold))
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(32)
+        .frame(maxWidth: 380)
+        .glassEffect(.regular, in: .rect(cornerRadius: 32))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// El fondo toma los colores de tus cuadernos más recientes.
@@ -222,46 +256,35 @@ struct NewNotebookSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
+            ScrollView {
+                VStack(spacing: 20) {
                     CoverArt(
                         title: title.isEmpty ? "Cuaderno sin título" : title,
                         color: Notebook.covers[cover]
                     )
-                    .frame(width: 140)
-                    .frame(maxWidth: .infinity)
+                    .frame(width: 150)
                     .animation(.smooth, value: cover)
-                }
-                .listRowBackground(Color.clear)
-
-                Section("Nombre") {
-                    TextField("Cuaderno sin título", text: $title)
-                }
-                Section("Color de la tapa") {
-                    HStack(spacing: 14) {
-                        ForEach(Notebook.covers.indices, id: \.self) { index in
-                            Circle()
-                                .fill(Notebook.covers[index].gradient)
-                                .frame(width: 32, height: 32)
-                                .padding(5)
-                                .glassEffect(cover == index ? .regular.interactive() : .identity, in: .circle)
-                                .onTapGesture { cover = index }
-                                .accessibilityLabel(Notebook.coverNames[index])
-                                .accessibilityAddTraits(cover == index ? .isSelected : [])
-                        }
-                    }
                     .padding(.vertical, 8)
-                }
-                Section("Tipo de hoja") {
-                    Picker("Tipo de hoja", selection: $style) {
-                        ForEach(PaperStyle.allCases) { style in
-                            Label(style.name, systemImage: style.icon).tag(style)
+
+                    GlassSection(title: "Nombre", systemImage: "character.cursor.ibeam") {
+                        GlassTextField(placeholder: "Cuaderno sin título", text: $title)
+                    }
+                    GlassSection(title: "Color de la tapa", systemImage: "paintpalette") {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            GlassColorPicker(selection: $cover)
+                                .padding(4)
                         }
                     }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
+                    GlassSection(title: "Tipo de hoja", systemImage: "doc.plaintext") {
+                        GlassPaperPicker(selection: $style)
+                    }
                 }
+                .padding(24)
+                .frame(maxWidth: 560)
+                .frame(maxWidth: .infinity)
             }
+            .glassScreen([Notebook.covers[cover], .white, Notebook.covers[cover]])
+            .animation(.smooth, value: cover)
             .navigationTitle("Nuevo cuaderno")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

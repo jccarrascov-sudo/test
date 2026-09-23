@@ -39,7 +39,7 @@ struct NotebookView: View {
         }
         // Con esto `geo.safeAreaInsets` trae la altura real de las barras.
         .ignoresSafeArea()
-        .background { GlassBackdrop(colors: [notebook.cover, .gray, notebook.cover], animated: false) }
+        .glassScreen([notebook.cover, .gray, notebook.cover], animated: false)
         .navigationTitle(notebook.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

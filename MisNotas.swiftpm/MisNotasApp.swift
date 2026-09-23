@@ -9,6 +9,7 @@ struct MisNotasApp: App {
         WindowGroup {
             LibraryView()
                 .environmentObject(store)
+                .tint(.indigo)
         }
         .onChange(of: scenePhase) { _, phase in
             // Guarda todo al salir de la app para no perder ningún trazo.
