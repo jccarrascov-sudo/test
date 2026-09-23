@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MisNotas Liquid Glass</title>
+<meta name="description" content="Vista previa aproximada de la interfaz Liquid Glass de MisNotas para iPad.">
+<style>
+  :root {
+    --bg: #eef0f7;
+    --text: #15161c;
+    --text-2: rgba(21, 22, 28, .6);
+    --glass-bg: rgba(255, 255, 255, .38);
+    --glass-bg-strong: rgba(255, 255, 255, .55);
+    --glass-border: rgba(255, 255, 255, .65);
+    --glass-edge: rgba(255, 255, 255, .9);
+    --glass-shadow: 0 10px 30px rgba(30, 30, 60, .16);
+    --accent: #5856d6;
+    --accent-2: #7a78ff;
+    --page-shadow: 0 18px 40px rgba(20, 20, 50, .22);
+    --device: #1c1c22;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d0e14;
+      --text: #f4f4f8;
+      --text-2: rgba(244, 244, 248, .62);
+      --glass-bg: rgba(40, 40, 52, .38);
+      --glass-bg-strong: rgba(50, 50, 64, .55);
+      --glass-border: rgba(255, 255, 255, .16);
+      --glass-edge: rgba(255, 255, 255, .35);
+      --glass-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+      --page-shadow: 0 18px 40px rgba(0, 0, 0, .5);
+      --device: #050507;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d0e14;
+    --text: #f4f4f8;
+    --text-2: rgba(244, 244, 248, .62);
+    --glass-bg: rgba(40, 40, 52, .38);
+    --glass-bg-strong: rgba(50, 50, 64, .55);
+    --glass-border: rgba(255, 255, 255, .16);
+    --glass-edge: rgba(255, 255, 255, .35);
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    --page-shadow: 0 18px 40px rgba(0, 0, 0, .5);
+    --device: #050507;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+  html, body { overflow-x: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  svg { display: block; }
+
+  /* ---------- Vidrio líquido ---------- */
+  .glass {
+    position: relative;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 var(--glass-edge),
+      inset 0 -1px 1px rgba(255, 255, 255, .12),
+      var(--glass-shadow);
+  }
+  /* Reflejo de luz en el borde superior */
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(160deg, rgba(255,255,255,.45), rgba(255,255,255,0) 38%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12));
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+  }
+  .glass.interactive { transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .2s; }
+  .glass.interactive:hover { background: var(--glass-bg-strong); }
+  .glass.interactive:active { transform: scale(1.08); }
+  .glass-prominent {
+    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+    color: #fff;
+    border-color: rgba(255,255,255,.35);
+  }
+
+  /* ---------- Encabezado de la página ---------- */
+  header.intro { max-width: 1040px; margin: 0 auto 20px; text-align: center; }
+  header.intro h1 { font-size: 26px; letter-spacing: -.02em; }
+  header.intro p { color: var(--text-2); margin-top: 4px; }
+  .tabs {
+    display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; margin-top: 16px;
+    background: linear-gradient(135deg, #c9c6ff, #ffc8de 50%, #b8f0ea);
+  }
+  .tabs-inner { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; position: relative; }
+  .tab { position: relative; z-index: 1; padding: 8px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; color: #2a2a35; }
+  .tab-thumb {
+    position: absolute; top: 4px; bottom: 4px; border-radius: 999px; z-index: 0;
+    transition: left .45s cubic-bezier(.34,1.4,.64,1), width .45s cubic-bezier(.34,1.4,.64,1);
+    background: rgba(255,255,255,.55);
+  }
+
+  /* ---------- iPad ---------- */
+  .stage { max-width: 1040px; margin: 0 auto; }
+  .device {
+    width: 100%;
+    aspect-ratio: 1064 / 808;
+    border-radius: 34px;
+    background: var(--device);
+    padding: 20px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .viewport { width: 100%; height: 100%; border-radius: 16px; overflow: hidden; position: relative; }
+  .screen {
+    position: absolute; top: 0; left: 0;
+    width: 1024px; height: 768px;
+    transform-origin: 0 0;
+    overflow: hidden;
+    color: #15161c;
+  }
+  .view { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .35s; }
+  .view.active { opacity: 1; pointer-events: auto; }
+
+  /* Fondo de colores en movimiento (como el MeshGradient) */
+  .backdrop { position: absolute; inset: 0; background: #f4f3fa; overflow: hidden; }
+  .blob { position: absolute; width: 620px; height: 620px; border-radius: 50%; filter: blur(90px); opacity: .55; animation: float 18s ease-in-out infinite alternate; }
+  .blob.b1 { background: #5856d6; top: -200px; left: -160px; }
+  .blob.b2 { background: #ff2d78; top: 180px; right: -220px; animation-delay: -6s; opacity: .38; }
+  .blob.b3 { background: #30c8b8; bottom: -260px; left: 240px; animation-delay: -12s; opacity: .45; }
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(80px, 60px) scale(1.1); }
+    100% { transform: translate(-60px, 30px) scale(.95); }
+  }
+  @media (prefers-reduced-motion: reduce) { .blob { animation: none; } }
+
+  .statusbar { position: absolute; top: 0; left: 0; right: 0; height: 24px; display: flex; justify-content: space-between; padding: 6px 22px 0; font-size: 12px; font-weight: 600; z-index: 5; }
+
+  /* ---------- Biblioteca ---------- */
+  .lib-top { position: absolute; top: 40px; left: 36px; right: 36px; display: flex; align-items: center; justify-content: space-between; }
+  .lib-top h2 { font-size: 34px; letter-spacing: -.02em; }
+  .search { display: flex; align-items: center; gap: 8px; width: 260px; padding: 10px 16px; border-radius: 999px; color: rgba(21,22,28,.55); }
+  .grid { position: absolute; top: 118px; left: 36px; right: 36px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 30px; }
+  .nb { text-align: left; }
+  .cover {
+    aspect-ratio: .75; border-radius: 18px; position: relative; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.4);
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .nb:hover .cover { transform: translateY(-4px) rotate(-1deg); }
+  .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(150deg, rgba(255,255,255,.4), transparent 45%, rgba(255,255,255,.08)); }
+  .spine { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; background: rgba(0,0,0,.15); }
+  .cover-title {
+    position: absolute; left: 20px; right: 10px; bottom: 10px; padding: 10px 12px; border-radius: 12px;
+    color: #fff; font-weight: 700; font-size: 15px; text-shadow: 0 1px 2px rgba(0,0,0,.25);
+    background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.4); z-index: 1;
+  }
+  .meta { display: inline-block; margin-top: 10px; padding: 4px 10px; border-radius: 999px; font-size: 11px; color: rgba(21,22,28,.62); }
+  .fab {
+    position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 999px; font-weight: 700; font-size: 16px;
+  }
+  .fab.glass.interactive:active { transform: translateX(-50%) scale(1.08); }
+
+  /* ---------- Cuaderno ---------- */
+  .nb-backdrop { position: absolute; inset: 0; background: linear-gradient(160deg, #d8d7f6, #e9e9ef 55%, #d4d3f3); }
+  .page-scroll { position: absolute; inset: 0; overflow: hidden; }
+  .page {
+    position: absolute; left: 20px; right: 20px; top: 76px; height: 1400px;
+    background:
+      linear-gradient(90deg, transparent 77px, rgba(237,133,133,.9) 77px, rgba(237,133,133,.9) 78.5px, transparent 78.5px),
+      repeating-linear-gradient(180deg, transparent 0 27px, #a3c2e6 27px 28px) 0 105px / 100% calc(100% - 105px) no-repeat,
+      #fff;
+    box-shadow: var(--page-shadow);
+    border-radius: 3px;
+  }
+  .page canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+  .hint { position: absolute; left: 100px; top: 118px; font: italic 22px/1 "Snell Roundhand", "Segoe Script", cursive; color: rgba(88,86,214,.8); pointer-events: none; transition: opacity .3s; }
+
+  .topbar { position: absolute; top: 28px; left: 16px; right: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; z-index: 4; }
+  .group { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; }
+  .group .ic { width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; transition: background .2s; }
+  .group .ic:hover { background: rgba(255,255,255,.4); }
+  .group .ic.on { background: rgba(88,86,214,.18); color: var(--accent); }
+  .group .count { font-size: 14px; font-variant-numeric: tabular-nums; color: rgba(21,22,28,.6); padding: 0 6px; }
+  .cluster { display: flex; gap: 10px; }
+  .title { font-weight: 700; font-size: 17px; padding: 10px 18px; border-radius: 999px; }
+
+  .palette {
+    position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 26px; z-index: 4;
+  }
+  .tool { width: 44px; height: 58px; border-radius: 14px; display: grid; place-items: end center; padding-bottom: 4px; transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+  .tool.on { transform: translateY(-8px); }
+  .sep { width: 1px; height: 32px; background: rgba(21,22,28,.15); margin: 0 6px; }
+  .swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,.9); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+  .swatch.on { transform: scale(1.25); box-shadow: 0 0 0 3px rgba(88,86,214,.35), 0 1px 3px rgba(0,0,0,.25); }
+
+  /* ---------- Nuevo cuaderno (hoja emergente) ---------- */
+  .dim { position: absolute; inset: 0; background: rgba(20,20,40,.2); }
+  .sheet {
+    position: absolute; left: 50%; top: 40px; bottom: 0; width: 560px; transform: translateX(-50%);
+    border-radius: 34px 34px 0 0; padding: 20px 24px; overflow: hidden;
+    background: rgba(255,255,255,.42);
+  }
+  .sheet-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .sheet-top h3 { font-size: 17px; }
+  .round { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+  .preview { width: 120px; margin: 4px auto 16px; }
+  .section { padding: 14px 16px; border-radius: 24px; margin-bottom: 14px; }
+  .section h4 { font-size: 13px; color: rgba(21,22,28,.6); margin-bottom: 10px; display: flex; gap: 6px; align-items: center; }
+  .field { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 999px; }
+  .field input { flex: 1; border: 0; outline: 0; background: none; font: inherit; color: #15161c; }
+  .colors { position: relative; display: flex; gap: 12px; }
+  .ring {
+    position: absolute; top: -6px; width: 44px; height: 44px; border-radius: 50%;
+    transition: left .5s cubic-bezier(.34,1.5,.64,1);
+  }
+  .dot { position: relative; z-index: 1; width: 32px; height: 32px; border-radius: 50%; }
+  .papers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .paper { padding: 10px 6px 8px; border-radius: 18px; text-align: center; font-size: 11px; }
+  .paper.on { background: rgba(88,86,214,.22); font-weight: 700; }
+  .mini { width: 44px; height: 62px; margin: 0 auto 6px; background: #fff; border-radius: 3px; box-shadow: 0 2px 5px rgba(0,0,0,.15); }
+  .mini.lined { background: repeating-linear-gradient(180deg, transparent 0 7px, #a3c2e6 7px 8px) 0 10px / 100% 100% no-repeat, #fff; }
+  .mini.squares { background: repeating-linear-gradient(0deg, #a3c2e6 0 1px, transparent 1px 7px), repeating-linear-gradient(90deg, #a3c2e6 0 1px, transparent 1px 7px), #fff; }
+  .mini.dotted { background: radial-gradient(circle, #aaa 0.9px, transparent 1.2px) 0 0 / 7px 7px, #fff; }
+
+  .notes { max-width: 1040px; margin: 22px auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .note { padding: 14px 16px; border-radius: 18px; background: var(--glass-bg-strong); border: 1px solid var(--glass-border); }
+  .note b { display: block; margin-bottom: 2px; }
+  .note span { color: var(--text-2); font-size: 14px; }
+  .tab { white-space: nowrap; }
+  @media (max-width: 600px) {
+    .tab { padding: 8px 11px; font-size: 13px; }
+    .device { padding: 10px; border-radius: 22px; }
+    .viewport { border-radius: 12px; }
+  }
+  footer { max-width: 1040px; margin: 18px auto 0; text-align: center; color: var(--text-2); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <h1>MisNotas · Liquid Glass</h1>
+  <p>Vista previa aproximada de cómo se ve la app en el iPad. Prueba a tocar los botones y escribir en la hoja.</p>
+  <div class="tabs" role="tablist" aria-label="Pantallas">
+    <div class="tabs-inner glass">
+      <span class="tab-thumb glass" aria-hidden="true"></span>
+      <button class="tab" role="tab" data-view="library" aria-selected="true">Cuadernos</button>
+      <button class="tab" role="tab" data-view="notebook" aria-selected="false">Escribir</button>
+      <button class="tab" role="tab" data-view="new" aria-selected="false">Nuevo cuaderno</button>
+    </div>
+  </div>
+</header>
+
+<main class="stage">
+  <div class="device">
+    <div class="viewport" id="viewport">
+      <div class="screen" id="screen">
+        <div class="statusbar"><span>9:41</span><span>100% ▮</span></div>
+
+        <!-- ================= Biblioteca ================= -->
+        <section class="view active" data-name="library">
+          <div class="backdrop"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+          <div class="lib-top">
+            <h2>Mis cuadernos</h2>
+            <div class="search glass">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              Buscar cuadernos
+            </div>
+          </div>
+          <div class="grid" id="grid"></div>
+          <button class="fab glass glass-prominent interactive" data-go="new">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Nuevo cuaderno
+          </button>
+        </section>
+
+        <!-- ================= Cuaderno ================= -->
+        <section class="view" data-name="notebook">
+          <div class="nb-backdrop"></div>
+          <div class="page-scroll">
+            <div class="page" id="page">
+              <span class="hint" id="hint">Escribe aquí con el dedo o el Apple Pencil ✍️</span>
+              <canvas id="ink"></canvas>
+            </div>
+          </div>
+
+          <div class="topbar">
+            <div class="cluster">
+              <div class="group glass"><button class="ic" data-go="library" aria-label="Volver"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button></div>
+              <div class="group glass"><button class="ic" aria-label="Ver páginas"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button></div>
+              <div class="group glass">
+                <button class="ic" aria-label="Página anterior" id="prev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m14 6-6 6 6 6"/></svg></button>
+                <span class="count" id="count">1 / 3</span>
+                <button class="ic" aria-label="Página siguiente" id="next"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m10 6 6 6-6 6"/></svg></button>
+              </div>
+            </div>
+            <div class="title glass">Biología</div>
+            <div class="cluster">
+              <div class="group glass">
+                <button class="ic" aria-label="Deshacer" id="undo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+                <button class="ic" aria-label="Rehacer" id="redo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+              </div>
+              <div class="group glass">
+                <button class="ic" aria-label="Solo Apple Pencil" id="pencilOnly"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l1.2-4.4L16.5 4.3a1.8 1.8 0 0 1 2.6 0l.6.6a1.8 1.8 0 0 1 0 2.6L8.4 18.8z"/></svg></button>
+                <button class="ic" aria-label="Nueva página" id="addPage"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M12 11v6M9 14h6"/></svg></button>
+              </div>
+              <div class="group glass"><button class="ic" aria-label="Más opciones"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg></button></div>
+            </div>
+          </div>
+
+          <div class="palette glass" id="palette">
+            <button class="tool on" data-tool="pen" aria-label="Lapicero"><svg width="22" height="50" viewBox="0 0 22 50"><path d="M5 50V14l6-12 6 12v36z" fill="#f2f2f5" stroke="#bbb"/><path d="M8 8l3-6 3 6z" class="tip" fill="#15161c"/></svg></button>
+            <button class="tool" data-tool="marker" aria-label="Resaltador"><svg width="22" height="50" viewBox="0 0 22 50"><path d="M4 50V16h14v34z" fill="#f2f2f5" stroke="#bbb"/><path d="M6 16l2-10h6l2 10z" class="tip" fill="#ffd60a"/></svg></button>
+            <button class="tool" data-tool="eraser" aria-label="Borrador"><svg width="22" height="50" viewBox="0 0 22 50"><path d="M4 50V12h14v38z" fill="#f2f2f5" stroke="#bbb"/><rect x="4" y="4" width="14" height="10" rx="3" fill="#ff8fa3"/></svg></button>
+            <span class="sep"></span>
+            <button class="swatch on" data-color="#15161c" style="background:#15161c" aria-label="Negro"></button>
+            <button class="swatch" data-color="#2f6fed" style="background:#2f6fed" aria-label="Azul"></button>
+            <button class="swatch" data-color="#e8364f" style="background:#e8364f" aria-label="Rojo"></button>
+            <button class="swatch" data-color="#1fa971" style="background:#1fa971" aria-label="Verde"></button>
+            <button class="swatch" data-color="#8e44ec" style="background:#8e44ec" aria-label="Morado"></button>
+          </div>
+        </section>
+
+        <!-- ================= Nuevo cuaderno ================= -->
+        <section class="view" data-name="new">
+          <div class="backdrop"><div class="blob b1" id="newBlob"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+          <div class="dim"></div>
+          <div class="sheet glass">
+            <div class="sheet-top">
+              <button class="round glass interactive" data-go="library" aria-label="Cancelar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+              <h3>Nuevo cuaderno</h3>
+              <button class="round glass glass-prominent interactive" data-go="notebook" aria-label="Crear"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>
+            </div>
+            <div class="preview"><div class="cover" id="previewCover"><div class="spine"></div><div class="cover-title glass" id="previewTitle">Cuaderno sin título</div></div></div>
+
+            <div class="section glass">
+              <h4>✎ Nombre</h4>
+              <label class="field glass">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(21,22,28,.5)" stroke-width="2"><path d="M4 20l1.2-4.4L16.5 4.3a1.8 1.8 0 0 1 2.6 0l.6.6a1.8 1.8 0 0 1 0 2.6L8.4 18.8z"/></svg>
+                <input id="nameInput" placeholder="Cuaderno sin título" maxlength="40" aria-label="Nombre del cuaderno">
+              </label>
+            </div>
+
+            <div class="section glass">
+              <h4>🎨 Color de la tapa</h4>
+              <div class="colors" id="colors"><span class="ring glass" id="ring"></span></div>
+            </div>
+
+            <div class="section glass">
+              <h4>📄 Tipo de hoja</h4>
+              <div class="papers" id="papers">
+                <button class="paper glass interactive" data-paper="blank"><div class="mini"></div>En blanco</button>
+                <button class="paper glass interactive on" data-paper="lined"><div class="mini lined"></div>Con líneas</button>
+                <button class="paper glass interactive" data-paper="grid"><div class="mini squares"></div>Cuadriculada</button>
+                <button class="paper glass interactive" data-paper="dotted"><div class="mini dotted"></div>Punteada</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>🪟 Barras que flotan</b><span>Los botones van en cápsulas de vidrio encima de la hoja; al hacer scroll, la página se ve a través.</span></div>
+    <div class="note"><b>🌈 Fondo vivo</b><span>El degradado se mueve lento y agarra los colores de tus cuadernos.</span></div>
+    <div class="note"><b>💧 Vidrio que se derrite</b><span>Al elegir color, el aro de vidrio se desliza de uno a otro.</span></div>
+    <div class="note"><b>✏️ Paleta de Apple</b><span>En la app real es la paleta del sistema de iPadOS 26, también de vidrio.</span></div>
+  </div>
+  <footer>Es una simulación en HTML: el vidrio real de iPadOS 26 refracta la luz y se ve todavía mejor.</footer>
+</main>
+
+<script>
+(() => {
+  const covers = [
+    ["Índigo", "#5856d6", "#7d7bff"], ["Rosado", "#ff2d78", "#ff78a8"], ["Turquesa", "#30b0c7", "#63d6e6"],
+    ["Naranja", "#ff9500", "#ffbd5c"], ["Verde", "#34c759", "#72df8e"], ["Morado", "#af52de", "#cf8af0"],
+    ["Azul", "#007aff", "#4da3ff"], ["Rojo", "#ff3b30", "#ff7a72"]
+  ];
+  const coverBg = i => `linear-gradient(160deg, ${covers[i][2]}, ${covers[i][1]})`;
+
+  /* ---- Escalar la pantalla de 1024×768 al tamaño disponible ---- */
+  const viewport = document.getElementById("viewport");
+  const screen = document.getElementById("screen");
+  const fit = () => {
+    const s = Math.min(viewport.clientWidth / 1024, viewport.clientHeight / 768);
+    screen.style.transform = `scale(${s})`;
+  };
+  new ResizeObserver(fit).observe(viewport);
+
+  /* ---- Pestañas ---- */
+  const tabs = [...document.querySelectorAll(".tab")];
+  const thumb = document.querySelector(".tab-thumb");
+  const views = [...document.querySelectorAll(".view")];
+  const moveThumb = tab => { thumb.style.left = tab.offsetLeft + "px"; thumb.style.width = tab.offsetWidth + "px"; };
+  const show = name => {
+    views.forEach(v => v.classList.toggle("active", v.dataset.name === name));
+    tabs.forEach(t => {
+      const on = t.dataset.view === name;
+      t.setAttribute("aria-selected", on);
+      if (on) moveThumb(t);
+    });
+    if (name === "notebook") sizeInk();
+  };
+  tabs.forEach(t => t.addEventListener("click", () => show(t.dataset.view)));
+  document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => show(b.dataset.go)));
+  requestAnimationFrame(() => moveThumb(tabs[0]));
+  window.addEventListener("resize", () => moveThumb(tabs.find(t => t.getAttribute("aria-selected") === "true")));
+
+  /* ---- Biblioteca ---- */
+  const notebooks = [["Biología", 0, 12], ["Matemática", 2, 8], ["Historia del Perú", 3, 5], ["Ideas y dibujos", 1, 21], ["Inglés", 4, 3]];
+  document.getElementById("grid").innerHTML = notebooks.map(([t, c, p]) => `
+    <button class="nb" data-go="notebook">
+      <div class="cover" style="background:${coverBg(c)};box-shadow:0 14px 28px ${covers[c][1]}55">
+        <div class="spine"></div><div class="cover-title glass">${t}</div>
+      </div>
+      <span class="meta glass">${p} pág. · 23 sep 2026</span>
+    </button>`).join("");
+  document.querySelectorAll("#grid [data-go]").forEach(b => b.addEventListener("click", () => show("notebook")));
+
+  /* ---- Nuevo cuaderno ---- */
+  const colors = document.getElementById("colors");
+  const ring = document.getElementById("ring");
+  const previewCover = document.getElementById("previewCover");
+  const previewTitle = document.getElementById("previewTitle");
+  const newBlob = document.getElementById("newBlob");
+  covers.forEach(([name], i) => {
+    const b = document.createElement("button");
+    b.className = "dot";
+    b.style.background = coverBg(i);
+    b.setAttribute("aria-label", name);
+    b.addEventListener("click", () => pickColor(i));
+    colors.appendChild(b);
+  });
+  const pickColor = i => {
+    const dot = colors.querySelectorAll(".dot")[i];
+    ring.style.left = (dot.offsetLeft - 6) + "px";
+    previewCover.style.background = coverBg(i);
+    previewCover.style.boxShadow = `0 14px 28px ${covers[i][1]}55`;
+    newBlob.style.background = covers[i][1];
+  };
+  requestAnimationFrame(() => pickColor(0));
+  document.getElementById("nameInput").addEventListener("input", e => {
+    previewTitle.textContent = e.target.value.trim() || "Cuaderno sin título";
+  });
+  document.querySelectorAll(".paper").forEach(p => p.addEventListener("click", () => {
+    document.querySelectorAll(".paper").forEach(x => x.classList.toggle("on", x === p));
+  }));
+
+  /* ---- Hoja para escribir (con presión del Apple Pencil) ---- */
+  const page = document.getElementById("page");
+  const ink = document.getElementById("ink");
+  const hint = document.getElementById("hint");
+  const ctx = ink.getContext("2d");
+  let strokes = [], redoStack = [], current = null;
+  let tool = "pen", color = "#15161c", pencilOnly = false;
+
+  function sizeInk() {
+    const r = window.devicePixelRatio || 1;
+    ink.width = page.offsetWidth * r;
+    ink.height = page.offsetHeight * r;
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    redraw();
+  }
+  function drawStroke(s) {
+    ctx.save();
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    if (s.tool === "marker") { ctx.globalAlpha = .35; ctx.globalCompositeOperation = "multiply"; }
+    if (s.tool === "eraser") { ctx.globalCompositeOperation = "destination-out"; }
+    ctx.strokeStyle = s.tool === "marker" ? "#ffd60a" : s.color;
+    for (let i = 1; i < s.pts.length; i++) {
+      const a = s.pts[i - 1], b = s.pts[i];
+      const base = s.tool === "marker" ? 22 : s.tool === "eraser" ? 26 : 3.2;
+      ctx.lineWidth = s.tool === "pen" ? base * (0.45 + b.p * 1.1) : base;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function redraw() {
+    ctx.clearRect(0, 0, ink.width, ink.height);
+    strokes.forEach(drawStroke);
+    hint.style.opacity = strokes.length ? 0 : 1;
+  }
+  const point = e => {
+    const r = ink.getBoundingClientRect();
+    const k = ink.offsetWidth / r.width; // compensa la escala de la vista previa
+    return { x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k, p: e.pressure || .5 };
+  };
+  ink.addEventListener("pointerdown", e => {
+    if (pencilOnly && e.pointerType !== "pen") return;
+    ink.setPointerCapture(e.pointerId);
+    current = { tool, color, pts: [point(e)] };
+    strokes.push(current); redoStack = [];
+  });
+  ink.addEventListener("pointermove", e => {
+    if (!current) return;
+    current.pts.push(point(e));
+    redraw();
+  });
+  const end = () => { current = null; };
+  ink.addEventListener("pointerup", end);
+  ink.addEventListener("pointercancel", end);
+
+  document.getElementById("undo").addEventListener("click", () => { if (strokes.length) { redoStack.push(strokes.pop()); redraw(); } });
+  document.getElementById("redo").addEventListener("click", () => { if (redoStack.length) { strokes.push(redoStack.pop()); redraw(); } });
+  document.getElementById("pencilOnly").addEventListener("click", e => {
+    pencilOnly = !pencilOnly;
+    e.currentTarget.classList.toggle("on", pencilOnly);
+  });
+  let pageNum = 1, pageTotal = 3;
+  const count = document.getElementById("count");
+  const updCount = () => { count.textContent = `${pageNum} / ${pageTotal}`; };
+  document.getElementById("prev").addEventListener("click", () => { pageNum = Math.max(1, pageNum - 1); updCount(); });
+  document.getElementById("next").addEventListener("click", () => { pageNum = Math.min(pageTotal, pageNum + 1); updCount(); });
+  document.getElementById("addPage").addEventListener("click", () => { pageTotal++; pageNum = pageTotal; updCount(); });
+
+  document.querySelectorAll(".tool").forEach(b => b.addEventListener("click", () => {
+    tool = b.dataset.tool;
+    document.querySelectorAll(".tool").forEach(x => x.classList.toggle("on", x === b));
+  }));
+  document.querySelectorAll(".swatch").forEach(b => b.addEventListener("click", () => {
+    color = b.dataset.color;
+    document.querySelectorAll(".swatch").forEach(x => x.classList.toggle("on", x === b));
+    document.querySelector('.tool[data-tool="pen"] .tip').setAttribute("fill", color);
+  }));
+})();
+</script>
+</body>
+</html>

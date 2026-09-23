@@ -14,6 +14,10 @@ App de apuntes a mano para iPad, estilo GoodNotes, hecha en **Swift + SwiftUI + 
 - **Todo es vidrio**: la pantalla de nuevo cuaderno (campo de texto en cápsula, colores con aro de vidrio que se desliza, mini-hojas en baldosas de vidrio), el buscador, la pantalla vacía y las alertas.
 - La paleta del Apple Pencil y las hojas emergentes usan el vidrio del sistema.
 
+## Vista previa
+
+Abre [`vista-previa.html`](vista-previa.html) en el navegador (en el iPad o la compu) para ver más o menos cómo se ve la app: la biblioteca, la hoja para escribir (sí puedes escribir con el dedo o el Apple Pencil) y la pantalla de nuevo cuaderno.
+
 ## Qué hace
 
 - 📚 **Biblioteca de cuadernos**: los creas con nombre y color de tapa, les cambias el nombre y los eliminas (mantén presionado un cuaderno).
